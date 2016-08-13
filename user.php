@@ -9,3 +9,6 @@ if (isset($_SESSION['user_name']))
     echo "hello, " . $_SESSION['user_name'];
 else
     header("Location: index.php?from=user");
+?>
+
+<p><a href="index.php?logout">logout</a> </p>

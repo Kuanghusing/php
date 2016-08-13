@@ -15,5 +15,7 @@ if ($login->userHasLoginIn() && $_GET['from'] != 'user') {
 //    header("Location: user.php");
     echo "<script>setTimeout(window.location.href='/user.php',1000);</script>";
 //    include 'user.php';
-} else
-    include 'login_in.php';
+} elseif(isset($_GET['reset_password']))
+    include 'View/reset_password.php';
+else
+    include 'View/login_in.php';

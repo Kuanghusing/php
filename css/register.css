@@ -20,15 +20,15 @@ body{
 
 
 
-#login, #reset_password, #register{
+#login, #register{
     border:none;
     background-color: transparent;
     margin:10px;
-    width:60px;
+    width:80px;
     height:30px;
 }
 
-#login:hover, #register:hover, #reset_password:hover{
+#login:hover, #register:hover{
     background-color: cadetblue;
     color: white;
 }
