@@ -7,3 +7,5 @@
  */
 if (isset($_SESSION['user_name']))
     echo "hello, " . $_SESSION['user_name'];
+else
+    header("Location: index.php?from=user");

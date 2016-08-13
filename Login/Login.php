@@ -20,28 +20,22 @@ class Login
 
     public function __construct()
     {
-        if (isset($_SESSION['user_id'])) {
+        $this->errors = array();
+        if (isset($_SESSION['user_id']))
             $this->loginWithSession($_SESSION['user_name'], $_SESSION['user_email']);
 
-        }
-        if (isset($_COOKIE['remember_me'])) {
+        if (isset($_COOKIE['remember_me']))
             $this->loginWithCookies($_COOKIE['remember_me']);
+
+        if (isset($_POST['login']))
+            $this->loginWithPostData();
+
+        if (isset($_GET['logout'])) {
+            $this->clearCookie();
+            echo '<script>alert("logout")</script>';
+            $this->errors = array();
         }
 
-
-        $filter = array(
-            "email" => FILTER_SANITIZE_EMAIL,
-            "password" => FILTER_SANITIZE_STRING,
-            "password_repeat" => FILTER_SANITIZE_STRING,
-            "captcha" => FILTER_SANITIZE_STRING,
-            "remember_me" => array("filter" => FILTER_VALIDATE_INT, "options" => array("min_range" => 0, "max_range" => 1,))
-
-        );
-
-        $filter_result = filter_input_array(INPUT_POST, $filter);
-        if (isset($filter_result['email']))
-            $this->loginWithPostData($filter_result['email'], $filter_result['password'], $filter_result['password_repeat'],
-                $filter_result['captcha'], $filter_result['remember_me']);
     }
 
     private function loginWithSession($username, $email)
@@ -49,6 +43,9 @@ class Login
         $this->username = $username;
         $this->email = $email;
         $this->has_login_in = true;
+        $this->errors = array();
+        $this->buildSession();
+
     }
 
     private function loginWithCookies($cookie)
@@ -57,70 +54,98 @@ class Login
         //check the cookie is valid
         if ($hash == hash("sha256", $username . $token . SECRET_KEY)) {
             //check token
-            if ($this->db_connection = DBConnection::getDBConnection()) {
-                if (DBConnection::checkCookieToken($this->db_connection, $username, $token)) {
+            if (DBConnection::checkCookieToken($username, $token)) {
 
-                    $this->username = $username;
-                    $result = DBConnection::getAllInfoByName($this->db_connection, $username);
-                    $this->email = $result->user_email;
-                    $this->user_id = $result->user_id;
+                $this->username = $username;
+                $result = DBConnection::getAllInfoByName($username);
+                $this->email = $result->user_email;
+                $this->user_id = $result->user_id;
 
-                    $this->has_login_in = true;
-                    $this->buildSession();
-                    //rebuild cookie(token only use once)
-                    $this->buildCookie();
-                } else {
-                    $this->clearCookie();
-                }
-
-                $this->db_connection = null;
+                $this->has_login_in = true;
+                $this->buildSession();
+                //rebuild cookie(token only use once)
+                $this->buildCookie();
             } else {
-                $this->errors["important"] = DB_CONNECT_ERROR;
+                $this->clearCookie();
+                $this->has_login_in = false;
             }
 
+            $this->db_connection = null;
+            $this->errors = array();
         } else {
             $this->clearCookie();
         }
+        DBConnection::closeDBConnection();
     }
 
 
-    private function loginWithPostData($username, $pwd, $pwd_repeat, $captcha, $remember_me)
+    private function loginWithPostData()
     {
+        $filter = array(
+            "email" => FILTER_VALIDATE_EMAIL,
+            "password" => FILTER_SANITIZE_STRING,
+            "captcha" => FILTER_SANITIZE_STRING,
+
+        );
+
+        $filter_result = filter_input_array(INPUT_POST, $filter);
+
+        $email = $filter_result['email'];
+        $pwd = $filter_result['password'];
+        $captcha = $filter_result['captcha'];
+        //not a email
+        if (!$email) {
+            $this->errors['email'] = ERROR_NOT_A_EMAIL;
+            return false;
+        }
+        //it can't be true
+        if (!isset($pwd) || !isset($captcha)) {
+            $this->errors['important'] = ERROR_LOGIN_ERROR;
+        }
         if (!isset($captcha) || $captcha != $_SESSION['captcha']) {
             $this->errors['captcha'] = ERROR_ERR_CAPTCHA;
             return false;
         }
-        if (!isset($pwd) || !isset($pwd_repeat) || $pwd != $pwd_repeat) {
+        /*if (!isset($pwd) || !isset($pwd_repeat) || $pwd != $pwd_repeat) {
             $this->errors["pwd_repeat"] = ERROR_PWD_NOT_SAME;
             return false;
 
-        }
+        }*/
         //user exists?
-        $this->db_connection = DBConnection::getDBConnection();
-        $result = DBConnection::getAllInfoByName($this->db_connection, $username);
+        $result = DBConnection::getAllInfoByName($email);
         if (!isset($result->user_id)) {
             $this->errors['email'] = ERROR_NO_USER_FOUND;
             return false;
         }
 
-        if (!password_verify($pwd, $result->password_hash)) {
-            $this->errors['important'] = ERROR_LOGIN_ERROR;
+        if (DBConnection::isUserLoginFailThreeTimes($email))
+        {
+            $this->errors['important'] = ERROR_LOGIN_FAIL_THREE_TIME;
             return false;
         }
 
+        if (!password_verify($pwd, $result->password_hash)) {
+            $this->errors['important'] = ERROR_LOGIN_ERROR;
+            DBConnection::userLoginFail($email);
+            return false;
+        }
+
+        if (!DBConnection::isUserActive($email))
+        {
+            $this->errors['important'] = ERROR_USER_NOT_ACTIVE;
+            return false;
+        }
         $this->user_id = $result->user_id;
         $this->username = $result->user_name;
         $this->email = $result->email;
-        if ($remember_me === 0) {
-            $this->clearCookie();
-        } else {
-            $this->buildCookie();
-        }
+
+        isset($_POST['remember_me']) ? $this->buildCookie() : $this->clearCookie();
+
         $this->buildSession();
         $this->has_login_in = true;
         $this->errors = array();
         $this->db_connection = null;
-
+        DBConnection::closeDBConnection();
         return true;
 
     }
@@ -141,11 +166,7 @@ class Login
         setcookie("remember_me", $remember_me_string, time() + COOKIE_EXPIRE_TIME);
 
         //update token
-        if ($this->db_connection = DBConnection::getDBConnection()) {
-            DBConnection::updateCookieToken($this->db_connection, $token, $this->username);
-        } else {
-            $this->errors['important'] = DB_CONNECT_ERROR;
-        }
+            DBConnection::updateCookieToken($token, $this->username);
 
         //TODO close db connect?
         $this->db_connection = null;
@@ -154,13 +175,10 @@ class Login
 
     private function clearCookie()
     {
+        session_destroy();
         setcookie("remember_me", "", time() - 60 * 60 * 24 * 365);
-        if ($this->db_connection = DBConnection::getDBConnection()) {
-            DBConnection::updateCookieToken($this->db_connection, "", $this->username);
-        } else {
-            $this->errors['important'] = DB_CONNECT_ERROR;
-        }
-
+            DBConnection::updateCookieToken(null, $this->username);
+        $this->errors = array();
         $this->db_connection = null;
 
     }
