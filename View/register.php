@@ -57,7 +57,7 @@
 
         </table>
         <div style="width: 70%;margin: 0 auto;">
-            <input type="submit" value="Register" name="register" id="register">
+            <input class="button" type="submit" value="Register" name="register" id="register">
 
             <button class="button" id="login"><a href="reset_password.php"
                                                  style="text-decoration: none;">Already Registered?</a></button>

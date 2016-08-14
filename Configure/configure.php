@@ -30,3 +30,27 @@ define('ERROR_LOGIN_ERROR', 'login fail!');
 define('ERROR_NOT_A_EMAIL', 'not a email!');
 define('ERROR_USER_NOT_ACTIVE', 'sorry, you having active your account');
 define('ERROR_LOGIN_FAIL_THREE_TIME', 'sorry, you had failed in logining for 3 three times, please wait for one hour and try it again...');
+
+
+
+
+//mail
+define('EMAIL_HOST', 'host');
+define('EMAIL_USER_NAME', 'username');
+define('EMAIL_PWD', 'pwd');
+define('EMAIL_PORT', '587');
+define('EMAIL_FROM', 'X@X.COM');
+define('EMAIL_FROM_NAME', 'my');
+define('EMAIL_SUBJECT', 'Please verify your account');
+define('EMAIL_BODY', 'click the link to verify ');
+define('EMAIL_VERIFY_LINK', '');
+define('EMAIL_HAS_SENT', 'verify email has sent!');
+define('EMAIL_VERIFY_FAIL', 'verify fail!');
+define('EMAIL_VERIFY_OK', 'your account is active now!');
+
+
+
+//token hash?
+define('COOKIE_TOKEN', 1);
+define('PWD_RESET_HASH', 2);
+define('REGISTER_TOKEN', 3);

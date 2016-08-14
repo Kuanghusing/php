@@ -20,12 +20,12 @@ body{
 
 
 
-#login, #register{
+.button{
     border:none;
     background-color: transparent;
     margin:10px;
-    width:80px;
-    height:30px;
+    width:90px;
+    height:40px;
 }
 
 #login:hover, #register:hover{

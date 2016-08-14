@@ -54,7 +54,7 @@ class Login
         //check the cookie is valid
         if ($hash == hash("sha256", $username . $token . SECRET_KEY)) {
             //check token
-            if (DBConnection::checkCookieToken($username, $token)) {
+            if (DBConnection::checkTokenOrHash($username, $token, COOKIE_TOKEN)) {
 
                 $this->username = $username;
                 $result = DBConnection::getAllInfoByName($username);

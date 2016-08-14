@@ -28,12 +28,20 @@ class DBConnection
     }
 
 
-    public static function checkCookieToken($username, $token)
+    public static function checkTokenOrHash($username, $token, $type)
     {
         $result = self::getAllInfoByName($username);
-        if ($token == $result->token) {
-            return true;
+        switch ($type) {
+            case COOKIE_TOKEN:
+                return $token == $result->user_rememberme_token;
+            case PWD_RESET_HASH:
+                return $token == $result->user_password_reset_hash;
+            case REGISTER_TOKEN:
+                return $token == $result->user_activation_hash;
+            default:
+                return false;
         }
+
 
         return false;
     }
@@ -61,7 +69,7 @@ class DBConnection
         $result = self::getAllInfoByName($username);
         $fail_count = $result->user_failed_logins;
         $stmt = self::getDBConnection()->prepare('UPDATE user SET user_failed_logins=:count WHERE user_name = :username');
-        $stmt->bindValue(":count", $fail_count + 1);
+        $stmt->bindValue(":count", $fail_count + 1, PDO::PARAM_INT);
         $stmt->execute();
     }
 
@@ -89,5 +97,15 @@ class DBConnection
     {
         self::$db_connection = null;
     }
+
+
+    public static function updatePwdResetHash($email, $hash)
+    {
+        $stmt = self::getDBConnection()->prepare('UPDATE user SET user_password_reset_hash = :hash WHERE user_email = :email');
+        $stmt->bindValue(':email', $email, PDO::PARAM_STR);
+        $stmt->bindValue(':hash', $hash, PDO::PARAM_STR);
+        $stmt->execute();
+    }
+
 
 }
