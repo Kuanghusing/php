@@ -16,16 +16,17 @@ body{
     width: 400px;
     height:400px;
     margin: 0 auto;
+    background-color: #ececec;
 }
 
 
 
 #login, #reset_password, #register{
     border:none;
-    background-color: transparent;
+    background-color: lightgreen;
     margin:10px;
-    width:60px;
-    height:30px;
+    width:100px;
+    height:40px;
 }
 
 #login:hover, #register:hover, #reset_password:hover{
@@ -34,4 +35,9 @@ body{
 }
 a{
     text-decoration: none;
+}
+.td_input input{
+    border:none;
+    width:170px;;
+    height:35px;
 }

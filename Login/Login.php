@@ -166,7 +166,7 @@ class Login
         setcookie("remember_me", $remember_me_string, time() + COOKIE_EXPIRE_TIME);
 
         //update token
-            DBConnection::updateCookieToken($token, $this->username);
+            DBConnection::updateToken($token, $this->username, COOKIE_TOKEN);
 
         //TODO close db connect?
         $this->db_connection = null;
@@ -177,7 +177,7 @@ class Login
     {
         session_destroy();
         setcookie("remember_me", "", time() - 60 * 60 * 24 * 365);
-            DBConnection::updateCookieToken(null, $this->username);
+            DBConnection::updateToken(null, $this->username, COOKIE_TOKEN);
         $this->errors = array();
         $this->db_connection = null;
 

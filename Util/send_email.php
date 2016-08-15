@@ -9,7 +9,7 @@ require_once '../lib/mail/class.phpmailer.php';
 require_once '../lib/mail/class.smtp.php';
 
 
-function send_email($address, $hash)
+function send_email($address, $query)
 {
     $mail = new PHPMailer();
     $mail->isSMTP();
@@ -22,7 +22,7 @@ function send_email($address, $hash)
     $mail->setFrom(EMAIL_FROM, EMAIL_FROM_NAME);
     $mail->addAddress($address);
     $mail->Subject = EMAIL_SUBJECT;
-    $mail->Body = EMAIL_BODY . '<a href=' . EMAIL_VERIFY_LINK . $hash . '>' . EMAIL_VERIFY_LINK . $hash . '</a>';
+    $mail->Body = EMAIL_BODY . '<a href=' . EMAIL_VERIFY_LINK . $query . '>' . EMAIL_VERIFY_LINK . $query . '</a>';
 
 
     if ($mail->send())

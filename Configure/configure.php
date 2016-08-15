@@ -35,18 +35,20 @@ define('ERROR_LOGIN_FAIL_THREE_TIME', 'sorry, you had failed in logining for 3 t
 
 
 //mail
+define('SERVER_HOST', 'http://127.0.0.1');
 define('EMAIL_HOST', 'host');
 define('EMAIL_USER_NAME', 'username');
 define('EMAIL_PWD', 'pwd');
 define('EMAIL_PORT', '587');
-define('EMAIL_FROM', 'X@X.COM');
+define('EMAIL_FROM', 'no_reply@xx.com');
 define('EMAIL_FROM_NAME', 'my');
 define('EMAIL_SUBJECT', 'Please verify your account');
 define('EMAIL_BODY', 'click the link to verify ');
-define('EMAIL_VERIFY_LINK', '');
+define('EMAIL_VERIFY_LINK', SERVER_HOST);
 define('EMAIL_HAS_SENT', 'verify email has sent!');
 define('EMAIL_VERIFY_FAIL', 'verify fail!');
 define('EMAIL_VERIFY_OK', 'your account is active now!');
+define('EMAIL_VERIFY_OUT_OF_TIME', 'fail, you havn\'t verify in and hour');
 
 
 

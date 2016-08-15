@@ -31,7 +31,7 @@
             <caption style="text-align: center;"><h1>Login in</h1></caption>
             <tr>
                 <td class="td_title"><label for="email">Email</label></td>
-                <td class="td_input"><input type="text" id="email" name="email" placeholder="xxx@xx.xx" required
+                <td class="td_input"><input type="email" id="email" name="email" placeholder="xxx@xx.xx" required
                                             value="<?php echo isset($_POST['email']) ? $_POST['email'] : "" ?>"/></td>
                 <td><span
                         class="error"><?php echo isset($login->errors['email']) ? $login->errors['email'] : "" ?></span>
@@ -65,7 +65,7 @@
             <button class="button" id="register"><a href="reset_password.php"
                                                     style="text-decoration: none;">Register</a></button>
 
-            <button class="button" id="reset_password"><a href="index.php?reset_password">Forget password?</a>
+            <button class="button" id="reset_password"><a href="index.php?reset_password">Forget pwd?</a>
             </button>
         </div>
     </form>
