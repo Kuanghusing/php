@@ -25,6 +25,12 @@
             color: red;
         }
 
+        input {
+            border: none;
+            width: 170px;
+            height: 35px;
+        }
+
         #main {
             background-color: #ececec;
             height: 300px;
@@ -34,20 +40,23 @@
     <script>function reload_captcha() {
             document.getElementById('captcha_img').setAttribute('src', 'Util/get_captcha.php?r=' + Math.random());
         }</script>
+
+
+<?php
+if (isset($reset->message['verify']) && $reset->message['verify'] != "") {
+    echo '<script>alert("' . $reset->message['verify'] . '")</script>';
+
+}
+if (isset($reset->message['reset']) && $reset->message['reset'] != "") {
+    echo '<script>alert("' . $reset->message['reset'] . '")</script>';
+}
+?>
+
+
 </head>
 
 
 <?php
-
-if (isset($message['verify'])) {
-    echo '<script>alert(' . $message['verify'] . ')';
-
-}
-if (isset($message['reset'])) {
-    echo '<script>alert(' . $message['reset'] . ')';
-}
-
-
 if ($reset->verified) {
 ?>
 
@@ -55,7 +64,7 @@ if ($reset->verified) {
 <div id="main">
     <form action="reset_pwd.php" method="post">
         <input type="text" name="email" hidden="hidden"
-               value="<?php echo filter_input(INPUT_GET, "email", FILTER_SANITIZE_STRING) ?>">
+               value="<?php echo $_SESSION['email']; ?>">
         <table cellpadding="10px">
             <caption style="text-align: center">Reset password</caption>
             <tr>
@@ -67,8 +76,8 @@ if ($reset->verified) {
                 <td><input type="password" id="pwd_repeat" required></td>
                 </td>
                 <?php
-                if (isset($errors['pwd']))
-                    echo '<td><span class="error"> ' . $errors['pwd'] . '</span></td>'
+                if (isset($reset->errors['pwd']))
+                    echo '<td><span class="error"> ' . $reset->errors['pwd'] . '</span></td>'
                 ?>
             </tr>
             <tr>
@@ -94,13 +103,13 @@ if ($reset->verified) {
                     <td><label for="email">Email</label></td>
                     <td><input type="email" name="email" required></td>
                     <span class="error"><?php
-                        if (isset($errors['email']))
-                            echo $errors['email'];
+                        if (isset($reset->errors['email']))
+                            echo $reset->errors['email'];
                         ?></span>
                 </tr>
                 <tr>
                     <td><label for="captcha">Captcha</label></td>
-                    <td><input type="text" required></td>
+                    <td><input type="text" name="captcha" required></td>
                     <td><img src="Util/get_captcha.php" alt="captcha"
                              onclick="reload_captcha()" id="captcha_img"></td>
                 </tr>

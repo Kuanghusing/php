@@ -28,3 +28,9 @@ CREATE TABLE IF NOT EXISTS user(
 CREATE USER demo IDENTIFIED BY '***';
 
 GRANT INSERT, UPDATE, SELECT, DELETE on demo.* TO kuahusg@localhost IDENTIFIED BY '***';
+
+
+//register
+INSERT INTO USER (user_name, user_password_hash, user_email, user_active,
+user_activation_hash, user_failed_logins, user_registration_datetime,
+user_registration_ip) VALUES ('user_name', 'pwd_hash', 'user_email', DEFAULT, 'active_hash', DEFAULT, DEFAULT, DEFAULT );

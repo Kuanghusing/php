@@ -10,12 +10,10 @@ require_once 'Login/Login.php';
 require_once 'Database/DBConnection.php';
 session_start();
 $login = new Login;
-if ($login->userHasLoginIn() && $_GET['from'] != 'user') {
+if ($login->userHasLoginIn()) {
     echo 'login in...';
 //    header("Location: user.php");
-    echo "<script>setTimeout(window.location.href='/user.php',1000);</script>";
+    echo "<script>setTimeout(window.location.href='user.php',2000);</script>";
 //    include 'user.php';
-} elseif(isset($_GET['reset_password']))
-    include 'View/reset_password.php';
-else
+} else
     include 'View/login_in.php';

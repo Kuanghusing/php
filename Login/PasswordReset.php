@@ -1,7 +1,5 @@
 <?php
 
-include_once '../Util/send_email.php';
-
 class Reset
 {
 
@@ -19,7 +17,6 @@ class Reset
     public $has_reset_pwd = false;
     public function __construct()
     {
-
 
         if (isset($_POST['require_reset']))
             $this->requestResetPwd();
@@ -40,12 +37,16 @@ class Reset
         $captcha = filter_input(INPUT_POST, "captcha", FILTER_SANITIZE_STRING);
 
         if (!isset($email)) {
+            echo "no a email";
             $this->errors['email'] = ERROR_NOT_A_EMAIL;
             return false;
         }
 
+
         if ($captcha != $_SESSION['captcha']) {
             $this->message['reset'] = ERROR_ERR_CAPTCHA;
+            echo "<br />captcha not the same!!<br />";
+            echo "anything here?" . ERROR_ERR_CAPTCHA;
             return false;
         }
 
@@ -56,12 +57,13 @@ class Reset
             return false;
         }
 
-        $hash = hash("sha256", $email . SECRET_KEY);
+        $hash = sha1(mt_rand());
         DBConnection::updatePwdResetHash($email, $hash);
 
+
+        require_once 'Util/send_email.php';
         if (send_email($email, '/reset_pwd.php?email='.$email.'&hash='.$hash))
             $this->message['reset'] = EMAIL_HAS_SENT;
-
         DBConnection::closeDBConnection();
     }
 
@@ -88,6 +90,9 @@ class Reset
         }
 
         $this->verified = true;
+        session_start();
+        $_SESSION['email'] = $email;
+        //to save the email from get method;
 
 
         DBConnection::closeDBConnection();
@@ -95,6 +100,7 @@ class Reset
 
     private function resetPwd()
     {
+        $this->verified = true;
         $this->has_reset_pwd = false;
         $pwd = filter_input(INPUT_POST, "pwd", FILTER_SANITIZE_STRING);
 
@@ -107,8 +113,11 @@ class Reset
         $email = filter_input(INPUT_POST, "email", FILTER_SANITIZE_STRING);
         if (DBConnection::resetPwd($email, null, $pwd)) {
             $this->has_reset_pwd = true;
+            print_r("ok?");
+        } else {
+            print_r("fail?");
         }
-
+        var_dump($email);
 
         DBConnection::closeDBConnection();
     }

@@ -5,9 +5,8 @@
  * Date: 16-8-14
  * Time: 下午11:07
  */
-require_once '../lib/mail/class.phpmailer.php';
-require_once '../lib/mail/class.smtp.php';
-
+require_once 'lib/mail/class.phpmailer.php';
+require_once 'lib/mail/class.smtp.php';
 
 function send_email($address, $query)
 {
@@ -26,8 +25,7 @@ function send_email($address, $query)
 
 
     if ($mail->send())
-        return true;
+        print_r("email send");
     else
-        return false;
-
+        echo $mail->ErrorInfo;
 }

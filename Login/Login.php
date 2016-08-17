@@ -9,18 +9,26 @@
 class Login
 {
 
+    public $errors = array("important" => "", "email" => "", "pwd" => "", "pwd_repeat" => "", "captcha" => "",);
     private $user_id;
     private $username;
     private $email;
     private $has_login_in = false;
     private $db_connection;
 
-    public $errors = array("important" => "", "email" => "", "pwd" => "", "pwd_repeat" => "", "captcha" => "",);
-
-
     public function __construct()
     {
         $this->errors = array();
+
+        if (isset($_GET['logout'])) {
+            $this->clearCookie();
+            echo '<script>alert("logout");</script>';
+            $has_login_in = false;
+            $this->errors = array();
+            return;
+        }
+
+
         if (isset($_SESSION['user_id']))
             $this->loginWithSession($_SESSION['user_name'], $_SESSION['user_email']);
 
@@ -30,11 +38,15 @@ class Login
         if (isset($_POST['login']))
             $this->loginWithPostData();
 
-        if (isset($_GET['logout'])) {
-            $this->clearCookie();
-            echo '<script>alert("logout")</script>';
-            $this->errors = array();
-        }
+
+    }
+
+    private function clearCookie()
+    {
+        setcookie("remember_me", "", time() - 60 * 60 * 24 * 365);
+        DBConnection::updateToken(null, $this->username, COOKIE_TOKEN);
+        $this->errors = array();
+        $this->db_connection = null;
 
     }
 
@@ -46,6 +58,14 @@ class Login
         $this->errors = array();
         $this->buildSession();
 
+    }
+
+    private function buildSession()
+    {
+        session_start();
+        $_SESSION['user_id'] = $this->user_id;
+        $_SESSION['user_name'] = $this->username;
+        $_SESSION['user_email'] = $this->email;
     }
 
     private function loginWithCookies($cookie)
@@ -78,6 +98,20 @@ class Login
         DBConnection::closeDBConnection();
     }
 
+    private function buildCookie()
+    {
+        $token = hash("sha256", mt_rand());
+        $hash = hash("sha256", $this->username . $token . SECRET_KEY);
+        $remember_me_string = $this->username . '|' . $token . '|' . $hash;
+        setcookie("remember_me", $remember_me_string, time() + COOKIE_EXPIRE_TIME);
+
+        //update token
+        DBConnection::updateToken($token, $this->username, COOKIE_TOKEN);
+
+        //TODO close db connect?
+        $this->db_connection = null;
+
+    }
 
     private function loginWithPostData()
     {
@@ -118,20 +152,21 @@ class Login
             return false;
         }
 
+
         if (DBConnection::isUserLoginFailThreeTimes($email))
         {
             $this->errors['important'] = ERROR_LOGIN_FAIL_THREE_TIME;
             return false;
         }
 
-        if (!password_verify($pwd, $result->password_hash)) {
+        if (!password_verify($pwd, $result->user_password_hash)) {
             $this->errors['important'] = ERROR_LOGIN_ERROR;
             DBConnection::userLoginFail($email);
+            print_r(ERROR_LOGIN_ERROR);
             return false;
         }
 
-        if (!DBConnection::isUserActive($email))
-        {
+        if (!DBConnection::isUserActive($email)) {
             $this->errors['important'] = ERROR_USER_NOT_ACTIVE;
             return false;
         }
@@ -139,47 +174,14 @@ class Login
         $this->username = $result->user_name;
         $this->email = $result->email;
 
-        isset($_POST['remember_me']) ? $this->buildCookie() : $this->clearCookie();
 
+        isset($_POST['remember_me']) ? $this->buildCookie() : $this->clearCookie();
         $this->buildSession();
         $this->has_login_in = true;
         $this->errors = array();
         $this->db_connection = null;
         DBConnection::closeDBConnection();
         return true;
-
-    }
-
-
-    private function buildSession()
-    {
-        $_SESSION['user_id'] = $this->user_id;
-        $_SESSION['user_name'] = $this->username;
-        $_SESSION['user_email'] = $this->email;
-    }
-
-    private function buildCookie()
-    {
-        $token = hash("sha256", mt_rand());
-        $hash = hash("sha256", $this->username . $token . SECRET_KEY);
-        $remember_me_string = $this->username . '|' . $token . '|' . $hash;
-        setcookie("remember_me", $remember_me_string, time() + COOKIE_EXPIRE_TIME);
-
-        //update token
-            DBConnection::updateToken($token, $this->username, COOKIE_TOKEN);
-
-        //TODO close db connect?
-        $this->db_connection = null;
-
-    }
-
-    private function clearCookie()
-    {
-        session_destroy();
-        setcookie("remember_me", "", time() - 60 * 60 * 24 * 365);
-            DBConnection::updateToken(null, $this->username, COOKIE_TOKEN);
-        $this->errors = array();
-        $this->db_connection = null;
 
     }
 

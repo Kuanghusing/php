@@ -14,8 +14,8 @@
     <title>Login in</title>
     <link type="text/css" rel="stylesheet" href="css/login_in.css"/>
     <?php
-    if (isset($login->errors) && !empty($login->errors['important'])) {
-        echo '<script>alert("' . $login->errors[0] . '")</script>';
+    if (isset($login->errors['important'])) {
+        echo '<script>alert("' . $login->errors['important'] . '")</script>';
     }
     ?>
     <script>function reload_captcha() {
@@ -62,14 +62,13 @@
         <div style="width: 100%;margin: 0 auto;">
             <input type="submit" value="Login" name="login" id="login">
 
-            <button class="button" id="register"><a href="reset_password.php"
+            <button class="button" id="register"><a href="register.php"
                                                     style="text-decoration: none;">Register</a></button>
 
-            <button class="button" id="reset_password"><a href="index.php?reset_password">Forget pwd?</a>
+            <button class="button" id="reset_password"><a href="reset_pwd.php">Forget pwd?</a>
             </button>
         </div>
     </form>
 </div>
 </body>
 </html>
-
