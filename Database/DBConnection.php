@@ -157,9 +157,6 @@ class DBConnection
         $result = self::getAllInfoByName($username);
         $last_fail = $result->user_last_failed_login;
         $fail_count = $result->user_failed_logins;
-        var_dump($fail_count);
-        var_dump($last_fail);
-        var_dump(time());
         if ($fail_count >= 3) {
             //one hour
             if ($last_fail + 60 * 60 > time()) {
@@ -199,9 +196,7 @@ class DBConnection
                 $stmt->bindValue(':email', $email, PDO::PARAM_STR);
                 $stmt->execute();
                 $result = $stmt->fetch();
-                $last_time = $result[0];
-                //last_time : datetime not timestamp
-                //TODO
+                $last_time = strtotime($result[0]);
             } catch (PDOException $e) {
                 echo $e->getMessage();
                 die();
@@ -209,9 +204,9 @@ class DBConnection
             $db_connection = null;
             if (isset($last_time)) {
                 if ($last_time + 60 * 60 > time()) {
-                    return false;
-                } else
                     return true;
+                } else
+                    return false;
             }
             return true;
 
@@ -242,7 +237,7 @@ class DBConnection
         }
     }
 
-    public function insertNewUser($email, $pwd_hash, $active_hash)
+    public static function insertNewUser($email, $pwd_hash, $active_hash)
     {
         $db_connection = self::getDBConnection();
         if ($db_connection instanceof PDO) {

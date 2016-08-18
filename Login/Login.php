@@ -162,7 +162,6 @@ class Login
         if (!password_verify($pwd, $result->user_password_hash)) {
             $this->errors['important'] = ERROR_LOGIN_ERROR;
             DBConnection::userLoginFail($email);
-            print_r(ERROR_LOGIN_ERROR);
             return false;
         }
 

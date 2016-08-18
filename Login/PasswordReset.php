@@ -37,7 +37,6 @@ class Reset
         $captcha = filter_input(INPUT_POST, "captcha", FILTER_SANITIZE_STRING);
 
         if (!isset($email)) {
-            echo "no a email";
             $this->errors['email'] = ERROR_NOT_A_EMAIL;
             return false;
         }
@@ -45,8 +44,6 @@ class Reset
 
         if ($captcha != $_SESSION['captcha']) {
             $this->message['reset'] = ERROR_ERR_CAPTCHA;
-            echo "<br />captcha not the same!!<br />";
-            echo "anything here?" . ERROR_ERR_CAPTCHA;
             return false;
         }
 
@@ -101,6 +98,7 @@ class Reset
     private function resetPwd()
     {
         $this->verified = true;
+        //重新回到verified的界面
         $this->has_reset_pwd = false;
         $pwd = filter_input(INPUT_POST, "pwd", FILTER_SANITIZE_STRING);
 
@@ -113,11 +111,9 @@ class Reset
         $email = filter_input(INPUT_POST, "email", FILTER_SANITIZE_STRING);
         if (DBConnection::resetPwd($email, null, $pwd)) {
             $this->has_reset_pwd = true;
-            print_r("ok?");
+            $_SESSION['email'] = null;//destroy session?
         } else {
-            print_r("fail?");
         }
-        var_dump($email);
 
         DBConnection::closeDBConnection();
     }

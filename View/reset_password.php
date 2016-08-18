@@ -73,7 +73,7 @@ if ($reset->verified) {
             </tr>
             <tr>
                 <td><label for="pwd_repeat">password repeat</label></td>
-                <td><input type="password" id="pwd_repeat" required></td>
+                <td><input type="password" id="pwd_repeat" name="pwd_repeat" required></td>
                 </td>
                 <?php
                 if (isset($reset->errors['pwd']))
